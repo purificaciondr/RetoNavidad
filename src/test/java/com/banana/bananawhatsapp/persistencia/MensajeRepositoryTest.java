@@ -46,6 +46,7 @@ class MensajeRepositoryTest {
         assertThrows(Exception.class, () -> {
             repo.crear(msj1);
         });
+        
         Mensaje msj2 = new Mensaje(1,null,us2, "msg correcto", LocalDate.now());
         assertThrows(Exception.class, () -> {
             repo.crear(msj2);
