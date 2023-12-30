@@ -77,7 +77,19 @@ class MensajeRepositoryTest {
     }
 
     @Test
-    void dadoUnUsuarioValido_cuandoBorrarTodos_entoncesOK() {
+    void dadoUnUsuarioValido_cuandoBorrarTodos_entoncesOK() throws SQLException {
+        // montamos chat que queremos borrar
+        Usuario us1 = new Usuario(1, "prueba borr rmt", "r@r.com", LocalDate.now(), true);
+        repoU.crear(us1);
+        Usuario us2 = new Usuario(1, "prueba borr dst", "d@d.com", LocalDate.now(), true);
+        repoU.crear(us2);
+        for (int i = 0; i < 10; i++) {
+            Mensaje msg = new Mensaje(1,us1, us2, "prueba test" + i, LocalDate.now());
+            repo.crear(msg);
+        }
+
+        //repo.borrarTodos(us1);
+
     }
 
     @Test

@@ -54,7 +54,34 @@ public class UsuarioRepository implements IUsuarioRepository{
 
     @Override
     public Usuario actualizar(Usuario usuario) throws SQLException {
-        return null;
+        Connection conn = null;
+        try {
+            usuario.valido();
+            conn = DriverManager.getConnection(db_url);
+            //conn.setAutoCommit(false);
+            // insertamos usuario
+            String sql = "UPDATE usuario SET email=?,nombre=?,activo=? WHERE id=?";
+            PreparedStatement pstm = conn.prepareStatement(sql);
+            pstm = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            pstm.setString(1, usuario.getEmail());
+            pstm.setString(2, usuario.getNombre());
+            pstm.setInt(3, usuario.isActivo() ? 1 : 0);
+            pstm.setInt(4,usuario.getId());
+
+            int rows = pstm.executeUpdate();
+            pstm.close();
+
+        } catch (Exception e) {
+            System.out.println("Transaccion rollback!!");
+            conn.rollback();
+            e.printStackTrace();
+            throw e;
+
+        } finally {
+            if (conn != null) conn.close();
+        }
+
+        return usuario;
     }
 
     @Override

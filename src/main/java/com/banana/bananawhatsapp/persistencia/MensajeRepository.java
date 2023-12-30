@@ -103,6 +103,43 @@ public class MensajeRepository implements IMensajeRepository{
 
     @Override
     public boolean borrarTodos(Usuario usuario) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(db_url);
+            //conn.setAutoCommit(false);
+            // consulta usuario
+            String sql = "SELECT * FROM usuario WHERE id=?";
+            PreparedStatement pstm = conn.prepareStatement(sql);
+            pstm.setInt(1, usuario.getId());
+            ResultSet rs = pstm.executeQuery();
+            if (!rs.next()) {
+                throw new SQLException("Usuario no existente");
+            }
+            pstm.close();
+
+            // borramos chat mensaje
+            sql = "DELETE FROM mensaje WHERE from_user=? OR to_user=? ";
+            pstm = conn.prepareStatement(sql);
+            pstm.setInt(1, usuario.getId());
+            pstm.setInt(2, usuario.getId());
+            int rows = pstm.executeUpdate();
+
+            if (rows <=0) {
+                throw new SQLException("Filas no borradas.");
+            }
+            pstm.close();
+            //conn.commit();
+
+        } catch (Exception e) {
+            System.out.println("Transaccion rollback!!");
+            conn.rollback();
+            e.printStackTrace();
+            System.out.println("mensaje " + e.getMessage());
+            throw e;
+        } finally {
+            if (conn != null) conn.close();
+        }
+
         return false;
     }
 }

@@ -68,6 +68,7 @@ public class ServicioMensajeria implements IServicioMensajeria{
 
     @Override
     public boolean borrarChatConUsuario(Usuario remitente, Usuario destinatario) throws UsuarioException, MensajeException {
+
         return false;
     }
 }

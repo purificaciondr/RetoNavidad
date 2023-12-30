@@ -30,12 +30,23 @@ public class ServicioUsuarios implements IServicioUsuarios{
 
     @Override
     public boolean borrarUsuario(Usuario usuario) throws UsuarioException {
+
         return false;
     }
 
     @Override
     public Usuario actualizarUsuario(Usuario usuario) throws UsuarioException {
-        return null;
+        if (!usuario.valido()) {
+            throw new UsuarioException();
+        } else {
+            try {
+                usuarioRepo.actualizar(usuario);
+            } catch (SQLException e) {
+                throw new UsuarioException(e.getMessage());
+            }
+        }
+
+        return usuario;
     }
 
     @Override

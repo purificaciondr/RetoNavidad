@@ -19,8 +19,7 @@ import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {SpringConfig.class})
@@ -57,10 +56,20 @@ class ServicioUsuariosTest {
 
     @Test
     void dadoUnUsuarioValido_cuandoBorrarUsuario_entoncesUsuarioValido() {
+        Usuario us1 = new Usuario(7,"prueba upt", "u@u.com", LocalDate.now(), true);
+        us1.setId(7);
+        Usuario udtUsu = servicio.actualizarUsuario(us1);
+        assertEquals(us1.getEmail(),udtUsu.getEmail());
+        assertEquals(us1.getNombre(),udtUsu.getNombre());
     }
 
     @Test
     void dadoUnUsuarioNOValido_cuandoBorrarUsuario_entoncesExcepcion() {
+        Usuario us1 = new Usuario(7,"prueba upt", "uu.com", LocalDate.now(), true);
+        us1.setId(7);
+        assertThrows(Exception.class, () -> {
+            servicio.actualizarUsuario(us1);
+        });
     }
 
     @Test

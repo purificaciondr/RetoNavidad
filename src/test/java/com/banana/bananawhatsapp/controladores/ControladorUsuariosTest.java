@@ -54,10 +54,19 @@ class ControladorUsuariosTest {
 
     @Test
     void dadoUsuarioValido_cuandoActualizar_entoncesUsuarioValido() {
+        Usuario us1 = new Usuario(3,"prueba udpcont", "u@control.com", LocalDate.now(), true);
+        us1.setId(7);
+        controladorUsuarios.actualizar(us1);
+        assertThat(outContent.toString(), containsString("Usuario actualizado"));
     }
 
     @Test
     void dadoUsuarioNOValido_cuandoActualizar_entoncesExcepcion() {
+        Usuario us1 = new Usuario(3,"prueba udpcont", "ucontrol.com", LocalDate.now(), true);
+        us1.setId(7);
+        assertThrows(Exception.class, () -> {
+            controladorUsuarios.actualizar(us1);
+        });
     }
 
     @Test
