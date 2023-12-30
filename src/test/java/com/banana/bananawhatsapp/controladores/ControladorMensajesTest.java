@@ -42,7 +42,7 @@ class ControladorMensajesTest {
     @Test
     void dadoRemitenteYDestinatarioYTextoNOValidos_cuandoEnviarMensaje_entoncesExcepcion() {
         assertThrows(Exception.class, () -> {
-            controladorMensajes.enviarMensaje(1,2,"Msg corto" );
+            controladorMensajes.enviarMensaje(1,3,"Msg corto" );
         });
 
 
@@ -50,14 +50,25 @@ class ControladorMensajesTest {
 
     @Test
     void dadoRemitenteYDestinatarioValidos_cuandoMostrarChat_entoncesOK() {
+        boolean enviado;
+        enviado = controladorMensajes.mostrarChat(1,2);
+        assertTrue(enviado);
+
     }
 
     @Test
     void dadoRemitenteYDestinatarioNOValidos_cuandoMostrarChat_entoncesExcepcion() {
+         assertThrows(Exception.class, () -> {
+            controladorMensajes.mostrarChat(1,3);
+        });
+
     }
 
     @Test
     void dadoRemitenteYDestinatarioValidos_cuandoEliminarChatConUsuario_entoncesOK() {
+         assertThrows(Exception.class, () -> {
+            controladorMensajes.enviarMensaje(1,2,"Msg corto" );
+        });
     }
 
     @Test

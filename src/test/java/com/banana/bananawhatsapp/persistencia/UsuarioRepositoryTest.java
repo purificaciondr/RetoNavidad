@@ -11,11 +11,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {SpringConfig.class})
@@ -62,11 +63,19 @@ class UsuarioRepositoryTest {
     }
 
     @Test
-    void dadoUnUsuarioValido_cuandoObtenerPosiblesDestinatarios_entoncesLista() {
+    void dadoUnUsuarioValido_cuandoObtenerPosiblesDestinatarios_entoncesLista() throws SQLException {
+        Set<Usuario> listaDesti = repo.obtenerPosiblesDestinatarios(1, 3);
+        System.out.println(listaDesti);
+        assertThat(listaDesti.size(), greaterThan(0));
+        assertThat(listaDesti.size(),lessThan(4));
     }
 
     @Test
     void dadoUnUsuarioNOValido_cuandoObtenerPosiblesDestinatarios_entoncesExcepcion() {
+
+         assertThrows(Exception.class, () -> {
+            repo.obtenerPosiblesDestinatarios(3, 3);  // usuario 3 inexistente
+        });
     }
 
 }

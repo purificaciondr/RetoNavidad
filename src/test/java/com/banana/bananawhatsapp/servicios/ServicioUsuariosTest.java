@@ -15,11 +15,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {SpringConfig.class})
@@ -64,6 +65,7 @@ class ServicioUsuariosTest {
 
     @Test
     void dadoUnUsuarioValido_cuandoActualizarUsuario_entoncesUsuarioValido() {
+
     }
 
     @Test
@@ -71,10 +73,20 @@ class ServicioUsuariosTest {
     }
 
     @Test
-    void dadoUnUsuarioValido_cuandoObtenerPosiblesDesinatarios_entoncesUsuarioValido() {
+    void dadoUnUsuarioValido_cuandoObtenerPosiblesDesinatarios_entoncesUsuariosValidos() {
+        Usuario us1 = new Usuario();
+        us1.setId(1);
+        Set<Usuario> listaDesti =  servicio.obtenerPosiblesDesinatarios(us1, 3);
+        assertThat(us1.getId(), greaterThan(0));
+        assertThat(listaDesti.size(),lessThan(4));
     }
 
     @Test
     void dadoUnUsuarioNOValido_cuandoObtenerPosiblesDesinatarios_entoncesExcepcion() {
+        Usuario us1 = new Usuario();
+        us1.setId(3);
+        assertThrows(Exception.class, () -> {
+            servicio.crearUsuario(us1);
+        });
     }
 }

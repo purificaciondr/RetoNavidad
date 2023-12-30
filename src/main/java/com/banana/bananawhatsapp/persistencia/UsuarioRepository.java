@@ -4,6 +4,8 @@ import com.banana.bananawhatsapp.modelos.Usuario;
 import lombok.Setter;
 
 import java.sql.*;
+import java.util.HashSet;
+import java.util.Queue;
 import java.util.Set;
 @Setter
 public class UsuarioRepository implements IUsuarioRepository{
@@ -62,6 +64,48 @@ public class UsuarioRepository implements IUsuarioRepository{
 
     @Override
     public Set<Usuario> obtenerPosiblesDestinatarios(Integer id, Integer max) throws SQLException {
-        return null;
+        Set<Usuario> listaDesti = new HashSet<>();
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(db_url);
+            // Consultamos usuario
+            String sql = "SELECT * FROM usuario WHERE id = ? AND activo = ?";
+            PreparedStatement pstm = conn.prepareStatement(sql);
+            pstm.setInt(1, id);
+            pstm.setInt(2, 1); // activo
+
+            ResultSet rs = pstm.executeQuery();
+            if (!rs.next())  {
+                throw new SQLException("Usuario " + id + " no activo");
+            }
+
+            // insertamos usuario
+            sql = "SELECT * FROM usuario WHERE id <>? AND activo = ?";
+            pstm = conn.prepareStatement(sql);
+            pstm.setInt(1, id);
+            pstm.setInt(2, 1); // activo
+
+            rs = pstm.executeQuery();
+            while (rs.next() && listaDesti.size()<max) {
+                listaDesti.add(new Usuario(
+                        rs.getInt("id"),
+                        rs.getString("nombre"),
+                        rs.getString("email"),
+                        rs.getDate("alta").toLocalDate(),
+                        rs.getBoolean("activo")
+                ));
+            }
+            pstm.close();
+
+        } catch (Exception e) {
+            System.out.println("Transaccion rollback!!");
+            e.printStackTrace();
+            throw e;
+
+        } finally {
+            if (conn != null) conn.close();
+        }
+
+        return listaDesti;
     }
 }

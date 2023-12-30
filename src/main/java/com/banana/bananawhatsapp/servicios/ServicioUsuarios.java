@@ -6,6 +6,8 @@ import com.banana.bananawhatsapp.persistencia.IUsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ServicioUsuarios implements IServicioUsuarios{
     @Autowired
@@ -37,7 +39,17 @@ public class ServicioUsuarios implements IServicioUsuarios{
     }
 
     @Override
-    public Usuario obtenerPosiblesDesinatarios(Usuario usuario, int max) throws UsuarioException {
-        return null;
+    public Set<Usuario> obtenerPosiblesDesinatarios(Usuario usuario, int max) throws UsuarioException {
+        Set<Usuario> listaDestinatario = new HashSet<>();
+        try {
+            listaDestinatario = usuarioRepo.obtenerPosiblesDestinatarios(usuario.getId(),max);
+            if (listaDestinatario.isEmpty()) {
+                throw new UsuarioException("Usuario sin destinatarios activos");
+            }
+        } catch (SQLException e) {
+            throw new UsuarioException(e.getMessage());
+        }
+        return listaDestinatario;
     }
+
 }

@@ -5,19 +5,34 @@ import com.banana.bananawhatsapp.exceptions.UsuarioException;
 import com.banana.bananawhatsapp.modelos.Mensaje;
 import com.banana.bananawhatsapp.modelos.Usuario;
 import com.banana.bananawhatsapp.persistencia.IMensajeRepository;
+import com.banana.bananawhatsapp.persistencia.IUsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ServicioMensajeria implements IServicioMensajeria{
     @Autowired
     IMensajeRepository mensajeRepo;
+    @Autowired
+    IUsuarioRepository usuarioRepo;
+    @Autowired
+    IServicioUsuarios servicioUsuarios;
     @Override
     public Mensaje enviarMensaje(Usuario remitente, Usuario destinatario, String texto) throws UsuarioException, MensajeException {
-        Mensaje msg = null;
-        msg = new Mensaje(1, remitente, destinatario, texto, LocalDate.now());
+        Set<Usuario> listaDesti = servicioUsuarios.obtenerPosiblesDesinatarios(remitente, 50);
+        boolean destEncontrado = false;
+        for (Usuario us: listaDesti) {
+            if (us.getId() == destinatario.getId()) { destEncontrado = true; }
+        }
+        if (!destEncontrado) {
+            throw new UsuarioException("Usuario destino no activo");
+        }
+        Mensaje msg = new Mensaje(1, remitente, destinatario, texto, LocalDate.now());
         try {
             mensajeRepo.crear(msg);
         } catch (Exception e) {
@@ -29,7 +44,26 @@ public class ServicioMensajeria implements IServicioMensajeria{
 
     @Override
     public List<Mensaje> mostrarChatConUsuario(Usuario remitente, Usuario destinatario) throws UsuarioException, MensajeException {
-        return null;
+        Set<Usuario> listaDesti = servicioUsuarios.obtenerPosiblesDesinatarios(remitente, 50);
+        boolean destEncontrado = false;
+        for (Usuario us: listaDesti) {
+            if (us.getId() == destinatario.getId()) { destEncontrado = true; }
+        }
+        if (!destEncontrado) {
+            throw new UsuarioException("Usuario destino no activo");
+        }
+        List<Mensaje> listChatDesti = new ArrayList<>();
+        try {
+            List<Mensaje> listaMensajes = mensajeRepo.obtener(remitente);
+            for (Mensaje msg: listaMensajes) {
+                if (msg.getDestinatario().getId().equals(destinatario.getId())) {
+                    listChatDesti.add(msg);
+                }
+            }
+        } catch (SQLException e) {
+            throw new MensajeException(e.getMessage());
+        }
+        return listChatDesti;
     }
 
     @Override
