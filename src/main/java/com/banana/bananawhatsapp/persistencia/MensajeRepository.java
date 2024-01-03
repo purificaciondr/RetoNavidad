@@ -102,26 +102,37 @@ public class MensajeRepository implements IMensajeRepository{
     }
 
     @Override
-    public boolean borrarTodos(Usuario usuario) throws SQLException {
+    public boolean borrarTodos(Usuario remitente, Usuario destinatario) throws SQLException {
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(db_url);
             //conn.setAutoCommit(false);
-            // consulta usuario
+            // consulta remitente
             String sql = "SELECT * FROM usuario WHERE id=?";
             PreparedStatement pstm = conn.prepareStatement(sql);
-            pstm.setInt(1, usuario.getId());
+            pstm.setInt(1, remitente.getId());
             ResultSet rs = pstm.executeQuery();
             if (!rs.next()) {
-                throw new SQLException("Usuario no existente");
+                throw new SQLException("Usuario remitente no existente");
             }
             pstm.close();
-
-            // borramos chat mensaje
-            sql = "DELETE FROM mensaje WHERE from_user=? OR to_user=? ";
+            // consulta destinatario
+            sql = "SELECT * FROM usuario WHERE id=?";
             pstm = conn.prepareStatement(sql);
-            pstm.setInt(1, usuario.getId());
-            pstm.setInt(2, usuario.getId());
+            pstm.setInt(1, destinatario.getId());
+            rs = pstm.executeQuery();
+            if (!rs.next()) {
+                throw new SQLException("Usuario destinatario no existente");
+            }
+            pstm.close();
+            // borramos chat mensaje
+            sql = "DELETE FROM mensaje WHERE from_user IN (?,?) AND to_user IN (?,?) ";
+            pstm = conn.prepareStatement(sql);
+            pstm.setInt(1, remitente.getId());
+            pstm.setInt(2, destinatario.getId());
+            pstm.setInt(3, remitente.getId());
+            pstm.setInt(4, destinatario.getId());
+
             int rows = pstm.executeUpdate();
 
             if (rows <=0) {
@@ -140,6 +151,6 @@ public class MensajeRepository implements IMensajeRepository{
             if (conn != null) conn.close();
         }
 
-        return false;
+        return true;
     }
 }

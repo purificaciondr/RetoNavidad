@@ -33,9 +33,9 @@ class UsuarioRepositoryTest {
     @Test
     void dadoUnUsuarioValido_cuandoCrear_entoncesUsuarioValido() throws SQLException {
         Usuario us1 = new Usuario(3,"prueba", "p@p.com", LocalDate.now(), true);
-        repo.crear(us1);
+        Usuario usRespue = repo.crear(us1);
         System.out.println(us1);
-        assertThat(us1.getId(), greaterThan(0));
+        assertThat(usRespue.getId(), greaterThan(0));
     }
 
     @Test

@@ -49,6 +49,7 @@ public class ServicioMensajeria implements IServicioMensajeria{
         for (Usuario us: listaDesti) {
             if (us.getId() == destinatario.getId()) { destEncontrado = true; }
         }
+
         if (!destEncontrado) {
             throw new UsuarioException("Usuario destino no activo");
         }
@@ -56,19 +57,28 @@ public class ServicioMensajeria implements IServicioMensajeria{
         try {
             List<Mensaje> listaMensajes = mensajeRepo.obtener(remitente);
             for (Mensaje msg: listaMensajes) {
-                if (msg.getDestinatario().getId().equals(destinatario.getId())) {
+                if (msg.getDestinatario().getId().equals(destinatario.getId())
+                || msg.getRemitente().getId().equals(destinatario.getId())) {
                     listChatDesti.add(msg);
                 }
             }
         } catch (SQLException e) {
             throw new MensajeException(e.getMessage());
         }
+        if (listChatDesti.isEmpty()) {
+            throw new MensajeException("Remitente y destinatario sin chat comun");
+        }
         return listChatDesti;
     }
 
     @Override
     public boolean borrarChatConUsuario(Usuario remitente, Usuario destinatario) throws UsuarioException, MensajeException {
-
-        return false;
+        try {
+            mostrarChatConUsuario(remitente,destinatario);
+            mensajeRepo.borrarTodos(remitente,destinatario);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return true;
     }
 }

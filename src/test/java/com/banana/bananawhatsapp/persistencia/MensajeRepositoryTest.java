@@ -15,7 +15,10 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {SpringConfig.class})
 @ActiveProfiles("default")
@@ -32,9 +35,9 @@ class MensajeRepositoryTest {
         Usuario us2 = new Usuario();
         us2.setId(2);
         Mensaje msj1 = new Mensaje(1,us1,us2, "Hola 2, esto es una prueba de envio de mensajes", LocalDate.now());
-        repo.crear(msj1);
-        System.out.println(msj1);
-        assertThat(msj1.getId(), greaterThan(0));
+        Mensaje msj1Respue = repo.crear(msj1);
+        System.out.println(msj1Respue);
+        assertThat(msj1Respue.getId(), greaterThan(0));
     }
 
     @Test
@@ -79,21 +82,30 @@ class MensajeRepositoryTest {
     @Test
     void dadoUnUsuarioValido_cuandoBorrarTodos_entoncesOK() throws SQLException {
         // montamos chat que queremos borrar
-        Usuario us1 = new Usuario(1, "prueba borr rmt", "r@r.com", LocalDate.now(), true);
-        repoU.crear(us1);
-        Usuario us2 = new Usuario(1, "prueba borr dst", "d@d.com", LocalDate.now(), true);
-        repoU.crear(us2);
+        Usuario us1 = repoU.crear(new Usuario(1, "prueba borr rmt", "r@r.com", LocalDate.now(), true));
+        Usuario us2 = repoU.crear(new Usuario(1, "prueba borr dst", "d@d.com", LocalDate.now(), true));
         for (int i = 0; i < 10; i++) {
-            Mensaje msg = new Mensaje(1,us1, us2, "prueba test" + i, LocalDate.now());
+            Mensaje msg = new Mensaje(1,us1, us2, "prueba test " + i, LocalDate.now());
             repo.crear(msg);
+            Mensaje msg2 = new Mensaje(1,us2, us1, "prueba test respuesta " + i, LocalDate.now());
+            repo.crear(msg2);
         }
 
-        //repo.borrarTodos(us1);
 
+        //repo.borrarTodos(us1);
+        boolean ok = repo.borrarTodos(us1, us2);
+        assertThat(ok,is(true));
     }
 
     @Test
     void dadoUnUsuarioNOValido_cuandoBorrarTodos_entoncesExcepcion() {
+        Usuario us1 = new Usuario();
+        us1.setId(1);
+        Usuario us2 = new Usuario();
+        us2.setId(3);  // no existe
+        assertThrows(Exception.class, () -> {
+            repo.borrarTodos(us1, us2);
+        });
     }
 
 }

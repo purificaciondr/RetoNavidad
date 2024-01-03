@@ -1,7 +1,10 @@
 package com.banana.bananawhatsapp.controladores;
 
 import com.banana.bananawhatsapp.config.SpringConfig;
+import com.banana.bananawhatsapp.modelos.Mensaje;
 import com.banana.bananawhatsapp.modelos.Usuario;
+import com.banana.bananawhatsapp.persistencia.IMensajeRepository;
+import com.banana.bananawhatsapp.persistencia.IUsuarioRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +30,11 @@ class ControladorMensajesTest {
     private final PrintStream originalErr = System.err;
     @Autowired
     ControladorMensajes controladorMensajes;
+    @Autowired
+    IUsuarioRepository usuarioRepo;
+    @Autowired
+    IMensajeRepository mensajeRepo;
+
     public void setUpStreams() {
         System.setOut(new PrintStream(outContent));
         System.setErr(new PrintStream(errContent));
@@ -65,13 +73,28 @@ class ControladorMensajesTest {
     }
 
     @Test
-    void dadoRemitenteYDestinatarioValidos_cuandoEliminarChatConUsuario_entoncesOK() {
-         assertThrows(Exception.class, () -> {
-            controladorMensajes.enviarMensaje(1,2,"Msg corto" );
-        });
+    void dadoRemitenteYDestinatarioValidos_cuandoEliminarChatConUsuario_entoncesOK() throws SQLException {
+        boolean borrado;
+
+        // montamos chat que queremos borrar
+        Usuario us1 = usuarioRepo.crear(new Usuario(1, "prueba borr rmt", "r@r.com", LocalDate.now(), true));
+        Usuario us2 = usuarioRepo.crear(new Usuario(1, "prueba borr dst", "d@d.com", LocalDate.now(), true));
+        for (int i = 0; i < 10; i++) {
+            Mensaje msg = new Mensaje(1,us1, us2, "prueba test " + i, LocalDate.now());
+            mensajeRepo.crear(msg);
+            Mensaje msg2 = new Mensaje(1,us2, us1, "prueba test respuesta " + i, LocalDate.now());
+            mensajeRepo.crear(msg2);
+        }
+
+        borrado = controladorMensajes.eliminarChatConUsuario(us1.getId(), us2.getId());
+        assertTrue(borrado);
+
     }
 
     @Test
     void dadoRemitenteYDestinatarioNOValidos_cuandoEliminarChatConUsuario_entoncesExcepcion() {
+         assertThrows(Exception.class, () -> {
+            controladorMensajes.eliminarChatConUsuario(1,3);
+        });
     }
 }
