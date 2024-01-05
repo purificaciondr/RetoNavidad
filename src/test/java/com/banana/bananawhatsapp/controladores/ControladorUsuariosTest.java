@@ -1,11 +1,13 @@
 package com.banana.bananawhatsapp.controladores;
 
 import com.banana.bananawhatsapp.config.SpringConfig;
+import com.banana.bananawhatsapp.modelos.Mensaje;
 import com.banana.bananawhatsapp.modelos.Usuario;
+import com.banana.bananawhatsapp.persistencia.IMensajeRepository;
 import com.banana.bananawhatsapp.persistencia.IUsuarioRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -31,6 +33,10 @@ class ControladorUsuariosTest {
 
     @Autowired
     ControladorUsuarios controladorUsuarios;
+    @Autowired
+    IUsuarioRepository usuarioRepo;
+    @Autowired
+    IMensajeRepository mensajeRepo;
     @BeforeEach
     public void setUpStreams() {
         System.setOut(new PrintStream(outContent));
@@ -70,10 +76,28 @@ class ControladorUsuariosTest {
     }
 
     @Test
-    void dadoUsuarioValido_cuandoBaja_entoncesUsuarioValido() {
+    void dadoUsuarioValido_cuandoBaja_entoncesUsuarioValido() throws SQLException {
+        // montamos chat que queremos borrar
+        Usuario us1 = usuarioRepo.crear(new Usuario(1, "prueba borr rmt", "r@r.com", LocalDate.now(), true));
+        Usuario us2 = usuarioRepo.crear(new Usuario(1, "prueba borr dst", "d@d.com", LocalDate.now(), true));
+        for (int i = 0; i < 10; i++) {
+            Mensaje msg = new Mensaje(1,us1, us2, "prueba test " + i, LocalDate.now());
+            mensajeRepo.crear(msg);
+            Mensaje msg2 = new Mensaje(1,us2, us1, "prueba test respuesta " + i, LocalDate.now());
+            mensajeRepo.crear(msg2);
+        }
+
+        controladorUsuarios.baja(us1);
+        assertThat(outContent.toString(), containsString("Usuario borrado"));
     }
 
     @Test
     void dadoUsuarioNOValido_cuandoBaja_entoncesExcepcion() {
+        Usuario us1 = new Usuario();
+        us1.setId(3);
+        assertThrows(Exception.class, () -> {
+            controladorUsuarios.baja(us1);
+        });
+
     }
 }

@@ -1,7 +1,8 @@
 package com.banana.bananawhatsapp.persistencia;
+
 import com.banana.bananawhatsapp.config.SpringConfig;
-import com.banana.bananawhatsapp.modelos.Usuario;
 import com.banana.bananawhatsapp.modelos.Mensaje;
+import com.banana.bananawhatsapp.modelos.Usuario;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {SpringConfig.class})

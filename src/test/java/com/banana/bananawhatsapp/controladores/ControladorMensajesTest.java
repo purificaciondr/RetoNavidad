@@ -5,6 +5,7 @@ import com.banana.bananawhatsapp.modelos.Mensaje;
 import com.banana.bananawhatsapp.modelos.Usuario;
 import com.banana.bananawhatsapp.persistencia.IMensajeRepository;
 import com.banana.bananawhatsapp.persistencia.IUsuarioRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,8 @@ import java.time.LocalDate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {SpringConfig.class})
 @ActiveProfiles("dev")
@@ -34,7 +36,7 @@ class ControladorMensajesTest {
     IUsuarioRepository usuarioRepo;
     @Autowired
     IMensajeRepository mensajeRepo;
-
+    @BeforeEach
     public void setUpStreams() {
         System.setOut(new PrintStream(outContent));
         System.setErr(new PrintStream(errContent));
@@ -44,7 +46,8 @@ class ControladorMensajesTest {
         boolean enviado;
         enviado = controladorMensajes.enviarMensaje(1,2,"Texto de mas de 10 palabras en el cuerpo del msg" );
         assertTrue(enviado);
-        //assertThat(outContent.toString(), containsString("Mensaje enviado"));
+        assertThat(outContent.toString(), containsString("Mensaje enviado"));
+
     }
 
     @Test
@@ -61,6 +64,7 @@ class ControladorMensajesTest {
         boolean enviado;
         enviado = controladorMensajes.mostrarChat(1,2);
         assertTrue(enviado);
+        assertThat(outContent.toString(), containsString("Mensajes entre"));
 
     }
 
@@ -88,6 +92,7 @@ class ControladorMensajesTest {
 
         borrado = controladorMensajes.eliminarChatConUsuario(us1.getId(), us2.getId());
         assertTrue(borrado);
+        assertThat(outContent.toString(), containsString("Mensajes borrados"));
 
     }
 

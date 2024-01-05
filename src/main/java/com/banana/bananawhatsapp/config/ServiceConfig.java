@@ -1,5 +1,6 @@
 package com.banana.bananawhatsapp.config;
 
+import com.banana.bananawhatsapp.persistencia.IMensajeRepository;
 import com.banana.bananawhatsapp.persistencia.IUsuarioRepository;
 import com.banana.bananawhatsapp.servicios.IServicioMensajeria;
 import com.banana.bananawhatsapp.servicios.IServicioUsuarios;
@@ -12,17 +13,19 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ServiceConfig {
     @Autowired
-    IUsuarioRepository repo;
+    IUsuarioRepository usuarioRepo;
+    @Autowired
+    IMensajeRepository mensajeRepo;
     @Bean
     public IServicioUsuarios getUsuarioService() {
         ServicioUsuarios usuSrv = new ServicioUsuarios();
-        //usuSrv.setRepository(repo);
+        usuSrv.setUsuarioRepo(usuarioRepo);
         return usuSrv;
     }
     @Bean
     public IServicioMensajeria getMensajeService() {
         ServicioMensajeria msgSrv = new ServicioMensajeria();
-        //usuSrv.setRepository(repo);
+        msgSrv.setMensajeRepo(mensajeRepo);
         return msgSrv;
     }
 }

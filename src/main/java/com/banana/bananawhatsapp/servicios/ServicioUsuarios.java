@@ -3,14 +3,15 @@ package com.banana.bananawhatsapp.servicios;
 import com.banana.bananawhatsapp.exceptions.UsuarioException;
 import com.banana.bananawhatsapp.modelos.Usuario;
 import com.banana.bananawhatsapp.persistencia.IUsuarioRepository;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
-
+@Setter
 public class ServicioUsuarios implements IServicioUsuarios{
-    @Autowired
+
     IUsuarioRepository usuarioRepo;
     @Override
     public Usuario crearUsuario(Usuario usuario) throws UsuarioException {
@@ -30,8 +31,12 @@ public class ServicioUsuarios implements IServicioUsuarios{
 
     @Override
     public boolean borrarUsuario(Usuario usuario) throws UsuarioException {
-
-        return false;
+        try {
+            usuarioRepo.borrar(usuario);
+        } catch (SQLException e) {
+            throw new UsuarioException(e.getMessage());
+        }
+        return true;
     }
 
     @Override

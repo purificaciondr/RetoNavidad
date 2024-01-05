@@ -1,6 +1,7 @@
 package com.banana.bananawhatsapp.persistencia;
 
 import com.banana.bananawhatsapp.config.SpringConfig;
+import com.banana.bananawhatsapp.modelos.Mensaje;
 import com.banana.bananawhatsapp.modelos.Usuario;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,8 +15,7 @@ import java.time.LocalDate;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
@@ -24,7 +24,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class UsuarioRepositoryTest {
     @Autowired
     IUsuarioRepository repo;
-
+    @Autowired
+    IMensajeRepository repoM;
     @Test
     void testBeans() {
         assertNotNull(repo);
@@ -67,11 +68,30 @@ class UsuarioRepositoryTest {
     }
 
     @Test
-    void dadoUnUsuarioValido_cuandoBorrar_entoncesOK() {
+    void dadoUnUsuarioValido_cuandoBorrar_entoncesOK() throws SQLException {
+        // creamos usuario y chat que queremos borrar
+        Usuario us1 = repo.crear(new Usuario(1, "prueba borr usu", "r@r.com", LocalDate.now(), true));
+        Usuario us2 = new Usuario();
+        us2.setId(1);
+        for (int i = 0; i < 10; i++) {
+            Mensaje msg = new Mensaje(1,us1, us2, "prueba test " + i, LocalDate.now());
+            repoM.crear(msg);
+            Mensaje msg2 = new Mensaje(1,us2, us1, "prueba test respuesta " + i, LocalDate.now());
+            repoM.crear(msg2);
+        }
+
+        boolean ok = repo.borrar(us1);
+        assertThat(ok,is(true));
     }
 
     @Test
-    void dadoUnUsuarioNOValido_cuandoBorrar_entoncesExcepcion() {
+    void dadoUnUsuarioNOValido_cuandoBorrar_entoncesExcepcion() throws SQLException {
+        Usuario us1 = repo.crear(new Usuario(1, "prueba borr usu", "r@r.com", LocalDate.now(), true));
+        us1.setId(3);  // usuario inexistente
+
+        assertThrows(Exception.class, () -> {
+            repo.borrar(us1);
+        } );
     }
 
     @Test

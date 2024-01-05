@@ -1,11 +1,13 @@
 package com.banana.bananawhatsapp.servicios;
 
 import com.banana.bananawhatsapp.config.SpringConfig;
+import com.banana.bananawhatsapp.exceptions.UsuarioException;
+import com.banana.bananawhatsapp.modelos.Mensaje;
 import com.banana.bananawhatsapp.modelos.Usuario;
+import com.banana.bananawhatsapp.persistencia.IMensajeRepository;
 import com.banana.bananawhatsapp.persistencia.IUsuarioRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -19,7 +21,8 @@ import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {SpringConfig.class})
@@ -34,11 +37,9 @@ class ServicioUsuariosTest {
     IServicioUsuarios servicio;
     @Autowired
     IUsuarioRepository usuarioRepo;
-    @BeforeEach
-    public void setUpStreams() {
-        System.setOut(new PrintStream(outContent));
-        System.setErr(new PrintStream(errContent));
-    }
+    @Autowired
+    IMensajeRepository mensajeRepo;
+
     @Test
     void dadoUnUsuarioValido_cuandoCrearUsuario_entoncesUsuarioValido() {
         Usuario us1 = new Usuario(3,"prueba", "p@p.com", LocalDate.now(), true);
@@ -49,7 +50,7 @@ class ServicioUsuariosTest {
     @Test
     void dadoUnUsuarioNOValido_cuandoCrearUsuario_entoncesExcepcion() {
         Usuario us1 = new Usuario(3,"prueba", "pp.com", LocalDate.now(), true);
-        assertThrows(Exception.class, () -> {
+        assertThrows(UsuarioException.class, () -> {
             servicio.crearUsuario(us1);
         });
     }
@@ -67,18 +68,36 @@ class ServicioUsuariosTest {
     void dadoUnUsuarioNOValido_cuandoBorrarUsuario_entoncesExcepcion() {
         Usuario us1 = new Usuario(7,"prueba upt", "uu.com", LocalDate.now(), true);
         us1.setId(7);
-        assertThrows(Exception.class, () -> {
+        assertThrows(UsuarioException.class, () -> {
             servicio.actualizarUsuario(us1);
         });
     }
 
     @Test
-    void dadoUnUsuarioValido_cuandoActualizarUsuario_entoncesUsuarioValido() {
+    void dadoUnUsuarioValido_cuandoActualizarUsuario_entoncesUsuarioValido() throws SQLException {
+        // montamos chat que queremos borrar
+        Usuario us1 = usuarioRepo.crear(new Usuario(1, "prueba borr rmt", "r@r.com", LocalDate.now(), true));
+        Usuario us2 = new Usuario();
+        us2.setId(1);
+        for (int i = 0; i < 10; i++) {
+            Mensaje msg = new Mensaje(1,us1, us2, "prueba test " + i, LocalDate.now());
+            mensajeRepo.crear(msg);
+            Mensaje msg2 = new Mensaje(1,us2, us1, "prueba test respuesta " + i, LocalDate.now());
+            mensajeRepo.crear(msg2);
+        }
 
+        boolean ok = servicio.borrarUsuario(us1);
+        assertThat(ok,is(true));
     }
 
     @Test
-    void dadoUnUsuarioNOValido_cuandoActualizarUsuario_entoncesExcepcion() {
+    void dadoUnUsuarioNOValido_cuandoActualizarUsuario_entoncesExcepcion() throws SQLException {
+        Usuario us1 = usuarioRepo.crear(new Usuario(1, "prueba borr usu", "r@r.com", LocalDate.now(), true));
+        us1.setId(3);  // usuario inexistente
+
+        assertThrows(UsuarioException.class, () -> {
+            servicio.borrarUsuario(us1);
+        } );
     }
 
     @Test
@@ -94,7 +113,7 @@ class ServicioUsuariosTest {
     void dadoUnUsuarioNOValido_cuandoObtenerPosiblesDesinatarios_entoncesExcepcion() {
         Usuario us1 = new Usuario();
         us1.setId(3);
-        assertThrows(Exception.class, () -> {
+        assertThrows(UsuarioException.class, () -> {
             servicio.crearUsuario(us1);
         });
     }

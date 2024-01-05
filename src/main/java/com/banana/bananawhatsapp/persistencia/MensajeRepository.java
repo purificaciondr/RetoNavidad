@@ -1,6 +1,5 @@
 package com.banana.bananawhatsapp.persistencia;
 
-import com.banana.bananawhatsapp.exceptions.UsuarioException;
 import com.banana.bananawhatsapp.modelos.Mensaje;
 import com.banana.bananawhatsapp.modelos.Usuario;
 import lombok.Setter;
@@ -18,7 +17,6 @@ public class MensajeRepository implements IMensajeRepository{
         try {
             mensaje.valido();
             conn = DriverManager.getConnection(db_url);
-            //conn.setAutoCommit(false);
 
             // insertamos mensaje
             String sql = "INSERT INTO mensaje VALUES(NULL,?,?,?,?)";
@@ -37,7 +35,6 @@ public class MensajeRepository implements IMensajeRepository{
                 throw new SQLException("Creating usuario failed, no ID obtained.");
             }
             pstm.close();
-            //conn.commit();
 
         } catch (Exception e) {
             System.out.println("Transaccion rollback!!");
@@ -68,7 +65,6 @@ public class MensajeRepository implements IMensajeRepository{
             }
             pstm.close();
 
-            //conn.setAutoCommit(false);
             sql = "SELECT * FROM mensaje WHERE from_user=? OR to_user=? ORDER BY id";
             pstm = conn.prepareStatement(sql);
             pstm.setInt(1, usuario.getId());
@@ -106,7 +102,6 @@ public class MensajeRepository implements IMensajeRepository{
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(db_url);
-            //conn.setAutoCommit(false);
             // consulta remitente
             String sql = "SELECT * FROM usuario WHERE id=?";
             PreparedStatement pstm = conn.prepareStatement(sql);
@@ -139,7 +134,6 @@ public class MensajeRepository implements IMensajeRepository{
                 throw new SQLException("Filas no borradas.");
             }
             pstm.close();
-            //conn.commit();
 
         } catch (Exception e) {
             System.out.println("Transaccion rollback!!");

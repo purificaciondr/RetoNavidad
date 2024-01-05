@@ -1,6 +1,8 @@
 package com.banana.bananawhatsapp.servicios;
 
 import com.banana.bananawhatsapp.config.SpringConfig;
+import com.banana.bananawhatsapp.exceptions.MensajeException;
+import com.banana.bananawhatsapp.exceptions.UsuarioException;
 import com.banana.bananawhatsapp.modelos.Mensaje;
 import com.banana.bananawhatsapp.modelos.Usuario;
 import com.banana.bananawhatsapp.persistencia.IMensajeRepository;
@@ -12,7 +14,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.sql.Array;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
@@ -21,7 +22,7 @@ import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {SpringConfig.class})
 @ActiveProfiles("default")
@@ -51,7 +52,7 @@ class ServicioMensajeriaTest {
         us1.setId(1);
         Usuario us2 = new Usuario();
         us2.setId(22);
-        assertThrows(Exception.class, () -> {
+        assertThrows(MensajeException.class, () -> {
             servicio.enviarMensaje(us1, us2, "Msm corto");
         });
     }
@@ -77,10 +78,10 @@ class ServicioMensajeriaTest {
         Usuario us3 = new Usuario();
         us3.setId(7);  // sin chat comun con 1
 
-        assertThrows(Exception.class, () -> {
+        assertThrows(UsuarioException.class, () -> {
             servicio.mostrarChatConUsuario(us1, us2);
         });
-        assertThrows(Exception.class, () -> {
+        assertThrows(MensajeException.class, () -> {
             servicio.mostrarChatConUsuario(us1, us3);
         });
     }
@@ -97,8 +98,6 @@ class ServicioMensajeriaTest {
             mensajeRepo.crear(msg2);
         }
 
-
-        //repo.borrarTodos(us1);
         boolean ok = servicio.borrarChatConUsuario(us1, us2);
         assertThat(ok,is(true));
     }
@@ -109,8 +108,13 @@ class ServicioMensajeriaTest {
         us1.setId(1);
         Usuario us2 = new Usuario();
         us2.setId(3);
-        assertThrows(Exception.class, () -> {
+        assertThrows(UsuarioException.class, () -> {
             servicio.borrarChatConUsuario(us1, us2);
+        });
+        Usuario us3 = new Usuario();
+        us3.setId(7);
+        assertThrows(MensajeException.class, () -> {
+            servicio.borrarChatConUsuario(us1, us3);
         });
     }
 }

@@ -6,20 +6,18 @@ import com.banana.bananawhatsapp.modelos.Mensaje;
 import com.banana.bananawhatsapp.modelos.Usuario;
 import com.banana.bananawhatsapp.persistencia.IMensajeRepository;
 import com.banana.bananawhatsapp.persistencia.IUsuarioRepository;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+@Setter
 public class ServicioMensajeria implements IServicioMensajeria{
-    @Autowired
     IMensajeRepository mensajeRepo;
-    @Autowired
-    IUsuarioRepository usuarioRepo;
+
     @Autowired
     IServicioUsuarios servicioUsuarios;
     @Override
@@ -44,15 +42,8 @@ public class ServicioMensajeria implements IServicioMensajeria{
 
     @Override
     public List<Mensaje> mostrarChatConUsuario(Usuario remitente, Usuario destinatario) throws UsuarioException, MensajeException {
-        Set<Usuario> listaDesti = servicioUsuarios.obtenerPosiblesDesinatarios(remitente, 50);
-        boolean destEncontrado = false;
-        for (Usuario us: listaDesti) {
-            if (us.getId() == destinatario.getId()) { destEncontrado = true; }
-        }
+        servicioUsuarios.obtenerPosiblesDesinatarios(destinatario, 50);  // para validar destinatario
 
-        if (!destEncontrado) {
-            throw new UsuarioException("Usuario destino no activo");
-        }
         List<Mensaje> listChatDesti = new ArrayList<>();
         try {
             List<Mensaje> listaMensajes = mensajeRepo.obtener(remitente);
@@ -77,7 +68,7 @@ public class ServicioMensajeria implements IServicioMensajeria{
             mostrarChatConUsuario(remitente,destinatario);
             mensajeRepo.borrarTodos(remitente,destinatario);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new MensajeException(e.getMessage());
         }
         return true;
     }

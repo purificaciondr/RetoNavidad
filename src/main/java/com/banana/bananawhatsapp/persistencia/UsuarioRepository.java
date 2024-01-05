@@ -5,7 +5,6 @@ import lombok.Setter;
 
 import java.sql.*;
 import java.util.HashSet;
-import java.util.Queue;
 import java.util.Set;
 @Setter
 public class UsuarioRepository implements IUsuarioRepository{
@@ -18,7 +17,6 @@ public class UsuarioRepository implements IUsuarioRepository{
         try {
             usuario.valido();
             conn = DriverManager.getConnection(db_url);
-            //conn.setAutoCommit(false);
             // insertamos usuario
             String sql = "INSERT INTO usuario VALUES(NULL,?,?,?,?)";
             PreparedStatement pstm = conn.prepareStatement(sql);
@@ -58,7 +56,6 @@ public class UsuarioRepository implements IUsuarioRepository{
         try {
             usuario.valido();
             conn = DriverManager.getConnection(db_url);
-            //conn.setAutoCommit(false);
             // insertamos usuario
             String sql = "UPDATE usuario SET email=?,nombre=?,activo=? WHERE id=?";
             PreparedStatement pstm = conn.prepareStatement(sql);
@@ -86,7 +83,40 @@ public class UsuarioRepository implements IUsuarioRepository{
 
     @Override
     public boolean borrar(Usuario usuario) throws SQLException {
-        return false;
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(db_url);
+            conn.setAutoCommit(false);
+            // delete de los mensajes del usuario  para poder eliminar la relacion
+            String sql = "DELETE FROM mensaje WHERE from_user=? OR to_user=?";
+            PreparedStatement pstm = conn.prepareStatement(sql);
+            pstm.setInt(1, usuario.getId());
+            pstm.setInt(2, usuario.getId());
+            int rows = pstm.executeUpdate();
+            pstm.close();
+
+            // borramos usuario
+            sql = "DELETE FROM usuario WHERE id=?";
+            pstm = conn.prepareStatement(sql);
+            pstm.setInt(1, usuario.getId());
+            rows = pstm.executeUpdate();
+            if (rows <=0) {
+                throw new SQLException("Filas no borradas.");
+            }
+            pstm.close();
+            conn.commit();
+
+        } catch (Exception e) {
+            System.out.println("Transaccion rollback!!");
+            conn.rollback();
+            e.printStackTrace();
+            System.out.println("mensaje " + e.getMessage());
+            throw e;
+        } finally {
+            if (conn != null) conn.close();
+        }
+
+        return true;
     }
 
     @Override
