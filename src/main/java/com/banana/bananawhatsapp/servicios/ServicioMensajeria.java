@@ -25,7 +25,10 @@ public class ServicioMensajeria implements IServicioMensajeria{
         Set<Usuario> listaDesti = servicioUsuarios.obtenerPosiblesDesinatarios(remitente, 50);
         boolean destEncontrado = false;
         for (Usuario us: listaDesti) {
-            if (us.getId() == destinatario.getId()) { destEncontrado = true; }
+            if (us.getId() == destinatario.getId()) {
+                destEncontrado = true;
+                break;
+            }
         }
         if (!destEncontrado) {
             throw new UsuarioException("Usuario destino no activo");

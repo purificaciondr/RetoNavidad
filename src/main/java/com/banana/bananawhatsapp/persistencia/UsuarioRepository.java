@@ -12,14 +12,13 @@ public class UsuarioRepository implements IUsuarioRepository{
 
     @Override
     public Usuario crear(Usuario usuario) throws SQLException {
-        System.out.println("dentro de repositorio " + db_url);
         Connection conn = null;
         try {
             usuario.valido();
             conn = DriverManager.getConnection(db_url);
             // insertamos usuario
             String sql = "INSERT INTO usuario VALUES(NULL,?,?,?,?)";
-            PreparedStatement pstm = conn.prepareStatement(sql);
+            PreparedStatement pstm;
             pstm = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             pstm.setInt(1, 1);   // activo
             pstm.setString(2, usuario.getAlta().toString());
@@ -38,7 +37,9 @@ public class UsuarioRepository implements IUsuarioRepository{
 
         } catch (Exception e) {
             System.out.println("Transaccion rollback!!");
-            conn.rollback();
+            if (conn != null) {
+                conn.rollback();
+            }
             e.printStackTrace();
             throw e;
 
@@ -58,7 +59,7 @@ public class UsuarioRepository implements IUsuarioRepository{
             conn = DriverManager.getConnection(db_url);
             // insertamos usuario
             String sql = "UPDATE usuario SET email=?,nombre=?,activo=? WHERE id=?";
-            PreparedStatement pstm = conn.prepareStatement(sql);
+            PreparedStatement pstm;
             pstm = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             pstm.setString(1, usuario.getEmail());
             pstm.setString(2, usuario.getNombre());
@@ -70,7 +71,9 @@ public class UsuarioRepository implements IUsuarioRepository{
 
         } catch (Exception e) {
             System.out.println("Transaccion rollback!!");
-            conn.rollback();
+            if (conn != null) {
+                conn.rollback();
+            }
             e.printStackTrace();
             throw e;
 
@@ -108,7 +111,9 @@ public class UsuarioRepository implements IUsuarioRepository{
 
         } catch (Exception e) {
             System.out.println("Transaccion rollback!!");
-            conn.rollback();
+            if (conn != null) {
+                conn.rollback();
+            }
             e.printStackTrace();
             System.out.println("mensaje " + e.getMessage());
             throw e;
@@ -122,9 +127,7 @@ public class UsuarioRepository implements IUsuarioRepository{
     @Override
     public Set<Usuario> obtenerPosiblesDestinatarios(Integer id, Integer max) throws SQLException {
         Set<Usuario> listaDesti = new HashSet<>();
-        Connection conn = null;
-        try {
-            conn = DriverManager.getConnection(db_url);
+        try (Connection conn = DriverManager.getConnection(db_url)) {
             // Consultamos usuario
             String sql = "SELECT * FROM usuario WHERE id = ? AND activo = ?";
             PreparedStatement pstm = conn.prepareStatement(sql);
@@ -132,7 +135,7 @@ public class UsuarioRepository implements IUsuarioRepository{
             pstm.setInt(2, 1); // activo
 
             ResultSet rs = pstm.executeQuery();
-            if (!rs.next())  {
+            if (!rs.next()) {
                 throw new SQLException("Usuario " + id + " no activo");
             }
 
@@ -143,7 +146,7 @@ public class UsuarioRepository implements IUsuarioRepository{
             pstm.setInt(2, 1); // activo
 
             rs = pstm.executeQuery();
-            while (rs.next() && listaDesti.size()<max) {
+            while (rs.next() && listaDesti.size() < max) {
                 listaDesti.add(new Usuario(
                         rs.getInt("id"),
                         rs.getString("nombre"),
@@ -159,8 +162,6 @@ public class UsuarioRepository implements IUsuarioRepository{
             e.printStackTrace();
             throw e;
 
-        } finally {
-            if (conn != null) conn.close();
         }
 
         return listaDesti;

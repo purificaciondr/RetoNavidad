@@ -56,7 +56,7 @@ public class ServicioUsuarios implements IServicioUsuarios{
 
     @Override
     public Set<Usuario> obtenerPosiblesDesinatarios(Usuario usuario, int max) throws UsuarioException {
-        Set<Usuario> listaDestinatario = new HashSet<>();
+        Set<Usuario> listaDestinatario;
         try {
             listaDestinatario = usuarioRepo.obtenerPosiblesDestinatarios(usuario.getId(),max);
             if (listaDestinatario.isEmpty()) {

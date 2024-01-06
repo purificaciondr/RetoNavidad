@@ -12,7 +12,6 @@ public class MensajeRepository implements IMensajeRepository{
     private String db_url;
     @Override
     public Mensaje crear(Mensaje mensaje) throws SQLException {
-        System.out.println("dentro de repositorio mensaje " + db_url);
         Connection conn = null;
         try {
             mensaje.valido();
@@ -87,7 +86,9 @@ public class MensajeRepository implements IMensajeRepository{
 
         } catch (Exception e) {
             System.out.println("Transaccion rollback!!");
-            conn.rollback();
+            if (conn != null) {
+                conn.rollback();
+            }
             e.printStackTrace();
             System.out.println("mensaje " + e.getMessage());
             throw e;
@@ -137,7 +138,9 @@ public class MensajeRepository implements IMensajeRepository{
 
         } catch (Exception e) {
             System.out.println("Transaccion rollback!!");
-            conn.rollback();
+            if (conn != null) {
+                conn.rollback();
+            }
             e.printStackTrace();
             System.out.println("mensaje " + e.getMessage());
             throw e;
